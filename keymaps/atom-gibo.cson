@@ -1,0 +1,5 @@
+'atom-workspace':
+  'ctrl-alt-g g': 'gibo:generate-gitignore'
+  'ctrl-alt-g l': 'gibo:list-boilerplates'
+  'ctrl-alt-g u': 'gibo:upgrade-boilerplates'
+  'ctrl-alt-g h': 'gibo:display-help-text'

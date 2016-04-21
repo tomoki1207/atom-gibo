@@ -1,0 +1,24 @@
+{
+  "name": "atom-gibo",
+  "main": "./lib/atom-gibo",
+  "version": "0.1.0",
+  "description": "Use gibo from Atom",
+  "keywords": [
+    "gibo"
+  ],
+  "activationCommands": {
+    "atom-workspace": [
+      "gibo:generate-gitignore",
+      "gibo:list-boilerplates",
+      "gibo:upgrade-boilerplates",
+      "gibo:display-help-text"
+    ]
+  },
+  "repository": "https://github.com/tomoki1207/atom-gibo",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+  }
+}
