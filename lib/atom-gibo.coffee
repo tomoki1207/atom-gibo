@@ -3,9 +3,9 @@ AtomGiboView = require './atom-gibo-view'
 
 path = require 'path'
 fs = require 'fs'
-exec = require('child_process').exec
+execFile = require('child_process').execFile
 
-giboPath = path.join __dirname, '/gibo', '/gibo'
+giboPath = path.join __dirname, '/gibo', if process.platform is 'win32' then '/gibo.bat' else '/gibo'
 
 module.exports = AtomGibo =
 
@@ -13,7 +13,8 @@ module.exports = AtomGibo =
   subscriptions: null
 
   activate: (state) ->
-    fs.chmod giboPath, 755
+    fs.chmod giboPath, '755', (err) ->
+      if err then console.error "Failed chmod to gibo file\n #{err}"
     @atomGiboView = new AtomGiboView(state.atomGiboViewState, (arg) => @doGibo(arg))
     @subscriptions = new CompositeDisposable
     @subscriptions.add atom.commands.add 'atom-workspace', 'gibo:generate-gitignore': => @createGitignore()
@@ -41,9 +42,9 @@ module.exports = AtomGibo =
     @doGiboWithOption '-h', 'gibo usage'
 
   doGiboWithOption: (option, description, callback) ->
-    exec "#{giboPath} #{option}", (err, stdout, stderr) =>
+    execFile giboPath, [option], (err, stdout, stderr) =>
       if err?
-        console.error err
+        console.error "Failed gibo with option\n #{err}"
         @showError err
       else
         @showInfo description, stdout
@@ -54,29 +55,43 @@ module.exports = AtomGibo =
     unless args.length <= 2
       return
 
-    exec "#{giboPath} #{args[0]}", (err, stdout, stderr) =>
+    execFile giboPath, [args[0].trim()], (err, stdout, stderr) =>
       if err?
-        console.error err
+        console.error "Faile gibo\n #{err}"
         @showError err
-      else if /unknown/i.test(stdout)
-        @showError stdout
-      else
-        if arg.trim().charAt(0) is '-'
-          @showInfo "gibo #{arg}", stdout
-        else
-          fileName = args[1]?.trim() ? '.gitignore'
-          filePath = path.join destDir ? atom.project.getPaths()[0], fileName
-          try
-            if /\s+>\s+/i.test(arg)
-              fs.writeFileSync filePath, stdout
-              @showInfo "gibo #{arg}", "Created #{fileName}", false
+        callback?()
+        return
+      if stderr or /unknown/i.test(stdout)
+        console.error "Unknown boilerplate\n #{stderr + stdout}"
+        @showError stderr + stdout
+        callback?()
+        return
+
+      if arg.trim().charAt(0) is '-'
+        @showInfo "gibo #{arg}", stdout
+        callback?()
+        return
+
+      fileName = args[1]?.trim() ? '.gitignore'
+      filePath = path.join destDir ? atom.project.getPaths()[0], fileName
+      try
+        if /\s+>\s+/i.test(arg)
+          fs.writeFile filePath, stdout, (err) =>
+            if err
+              console.error "Failed writeFile caused by\n #{err}"
             else
-              fs.appendFileSync filePath, stdout
+              @showInfo "gibo #{arg}", "Created #{fileName}", false
+            callback?()
+        else
+          fs.appendFile filePath, stdout, (err) =>
+            if err
+              console.error "Failed appendFile caused by\n #{err}"
+            else
               @showInfo "gibo #{arg}", "Updated #{fileName}", false
-          catch err
-            console.error err
-            @showError err
-      callback?()
+            callback?()
+      catch err
+        console.error "Exception occurred when access file\n #{err}"
+        @showError err
 
   showInfo: (title, msg, dismiss = true) ->
     atom.notifications.addInfo "[gibo] #{title}", detail: msg, dismissable: dismiss

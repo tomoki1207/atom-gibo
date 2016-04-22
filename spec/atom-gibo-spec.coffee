@@ -139,59 +139,92 @@ describe "AtomGibo", ->
     fs = require('fs')
     path = require('path')
     os = require('os')
-    testDir = path.join os.tmpdir(), helper.randomString(16)
-    fs.mkdirSync testDir
-    it "called with 'java'", ->
-      spyOn(fs, "appendFileSync").andCallThrough()
-      spy = jasmine.createSpy "callbackSpy"
-      AtomGibo.doGibo 'java', testDir, spy
+    fs.mkdirSync './spec/output', '777' if !fs.existsSync './spec/output'
+    testDir = path.join './spec/output', helper.randomString(16)
+    fs.mkdirSync testDir, '777'
+    it "called with 'Java'", ->
+      cloneSpy = jasmine.createSpy "cloneSpy"
+      AtomGibo.doGibo '-u', testDir, cloneSpy
       waitsFor ->
-        spy.callCount > 0
+        cloneSpy.callCount > 0
+      , 'waitsfor clone'
+      , 10000
       runs ->
-        file = path.join testDir, '.gitignore'
-        expect(fs.existsSync(file)).toBeTruthy()
-        expect(fs.appendFileSync).toHaveBeenCalled()
-    it "called with 'jawa' (unknown param)", ->
-      spyOn AtomGibo, "showError"
-      spy = jasmine.createSpy "callbackSpy"
-      AtomGibo.doGibo 'jawa', testDir, spy
+        spyOn(fs, "appendFile").andCallThrough()
+        spy = jasmine.createSpy "callbackSpy"
+        AtomGibo.doGibo 'Java', testDir, spy
+        waitsFor ->
+          spy.callCount > 0
+        runs ->
+          file = path.join testDir, '.gitignore'
+          expect(fs.existsSync(file)).toBeTruthy()
+          expect(fs.appendFile).toHaveBeenCalled()
+          expect(helper.fileSize(file)).toBeGreaterThan 0
+    it "called with 'Jawa' (unknown param)", ->
+      cloneSpy = jasmine.createSpy "cloneSpy"
+      AtomGibo.doGibo '-u', testDir, cloneSpy
       waitsFor ->
-        spy.callCount > 0
+        cloneSpy.callCount > 0
+      , 'waitsfor clone'
+      , 10000
       runs ->
-        expect(AtomGibo.showError).toHaveBeenCalled()
+        spyOn AtomGibo, "showError"
+        spy = jasmine.createSpy "callbackSpy"
+        AtomGibo.doGibo 'Jawa', testDir, spy
+        waitsFor ->
+          spy.callCount > 0
+        runs ->
+          expect(AtomGibo.showError).toHaveBeenCalled()
     it "called with redirect >", ->
-      param = 'java > .singleRedirection'
-      spyOn(fs, "writeFileSync").andCallThrough()
-      spy = jasmine.createSpy "callbackSpy"
-      AtomGibo.doGibo param, testDir, spy
+      param = 'Java > .singleRedirection'
+      cloneSpy = jasmine.createSpy "cloneSpy"
+      AtomGibo.doGibo '-u', testDir, cloneSpy
       waitsFor ->
-        spy.callCount > 0
+        cloneSpy.callCount > 0
+      , 'waitsfor clone'
+      , 10000
       runs ->
-        file = path.join testDir, '.singleRedirection'
-        expect(fs.existsSync(file)).toBeTruthy()
-        expect(fs.writeFileSync).toHaveBeenCalled()
-        size = helper.fileSize file
+        spyOn(fs, "writeFile").andCallThrough()
         spy = jasmine.createSpy "callbackSpy"
         AtomGibo.doGibo param, testDir, spy
         waitsFor ->
           spy.callCount > 0
         runs ->
-          expect(helper.fileSize(file)).toEqual size
+          file = path.join testDir, '.singleRedirection'
+          expect(fs.existsSync(file)).toBeTruthy()
+          expect(fs.writeFile).toHaveBeenCalled()
+          size = helper.fileSize file
+          expect(size).toBeGreaterThan 0
+          size = helper.fileSize file
+          spy = jasmine.createSpy "callbackSpy"
+          AtomGibo.doGibo param, testDir, spy
+          waitsFor ->
+            spy.callCount > 0
+          runs ->
+            expect(helper.fileSize(file)).toEqual size
     it "called with redirect >>", ->
-      param = 'java >> .doubleRedirection'
-      spyOn(fs, "writeFileSync").andCallThrough()
-      spy = jasmine.createSpy "callbackSpy"
-      AtomGibo.doGibo param, testDir, spy
+      param = 'Java >> .doubleRedirection'
+      cloneSpy = jasmine.createSpy "cloneSpy"
+      AtomGibo.doGibo '-u', testDir, cloneSpy
       waitsFor ->
-        spy.callCount > 0
+        cloneSpy.callCount > 0
+      , 'waitsfor clone'
+      , 10000
       runs ->
-        file = path.join testDir, '.doubleRedirection'
-        expect(fs.existsSync(file)).toBeTruthy()
-        expect(fs.writeFileSync).toHaveBeenCalled()
-        size = helper.fileSize file
+        spyOn(fs, "writeFile").andCallThrough()
         spy = jasmine.createSpy "callbackSpy"
         AtomGibo.doGibo param, testDir, spy
         waitsFor ->
           spy.callCount > 0
         runs ->
-          expect(helper.fileSize(file)).toBeGreaterThan size
+          file = path.join testDir, '.doubleRedirection'
+          expect(fs.existsSync(file)).toBeTruthy()
+          expect(fs.writeFile).toHaveBeenCalled()
+          size = helper.fileSize file
+          expect(size).toBeGreaterThan 0
+          spy = jasmine.createSpy "callbackSpy"
+          AtomGibo.doGibo param, testDir, spy
+          waitsFor ->
+            spy.callCount > 0
+          runs ->
+            expect(helper.fileSize(file)).toBeGreaterThan size

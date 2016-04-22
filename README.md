@@ -16,17 +16,17 @@ Using [gibo](https://github.com/simonwhitaker/gibo) from Atom.
 
   + generate new .gitignore
 
-    `java`  
+    `Java`  
     or  
-    `java > .gitignore`
+    `Java > .gitignore`
 
   + append other boilerplates to .gitignore
 
-    `jboss >> .gitignore`
+    `Jboss >> .gitignore`
 
   + generate as anothor name (like .hgignore)
 
-    `python >> .hgignore`
+    `Python >> .hgignore`
 
 1. Create/Update your .gitignore **under project root folder**.
 
