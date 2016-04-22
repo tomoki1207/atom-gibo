@@ -33,7 +33,7 @@ Using [gibo](https://github.com/simonwhitaker/gibo) from Atom.
 ### Commands
 
 option | description | default key binding
-:---|
+:---|:---|:---
 gibo _[boilerplates]_ | generate .gitignore file | `Ctrl-Alt-g g`
 gibo --help | Display gibo help text | `Ctrl-Alt-g h`
 gibo --list | List available boilerplates | `Ctrl-Alt-g l`

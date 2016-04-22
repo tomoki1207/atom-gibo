@@ -5,7 +5,7 @@ path = require 'path'
 fs = require 'fs'
 exec = require('child_process').exec
 
-giboPath = path.join __dirname, '..', '/gibo', '/gibo'
+giboPath = path.join __dirname, '/gibo', '/gibo'
 
 module.exports = AtomGibo =
 
