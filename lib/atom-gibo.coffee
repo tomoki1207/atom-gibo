@@ -61,7 +61,8 @@ module.exports = AtomGibo =
         @showError err
         callback?()
         return
-      if /unknown/i.test(stdout)
+      msg = if process.platform is 'win32' then stdout else stderr
+      if /unknown/i.test(msg)
         console.error "Unknown boilerplate\n #{stdout}"
         @showError stdout
         callback?()
