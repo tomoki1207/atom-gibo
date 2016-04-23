@@ -56,7 +56,7 @@ module.exports = AtomGibo =
       return
 
     execFile giboPath, [args[0].trim()], (err, stdout, stderr) =>
-      if err?
+      if err? and !(err.startsWith('Cloning'))
         console.error "Faile gibo\n #{err}"
         @showError err
         callback?()
@@ -67,7 +67,7 @@ module.exports = AtomGibo =
         callback?()
         return
 
-      if arg.trim().charAt(0) is '-'
+      if arg.trim().startsWith '-'
         @showInfo "gibo #{arg}", stdout
         callback?()
         return
@@ -77,7 +77,7 @@ module.exports = AtomGibo =
       try
         if /\s+>\s+/i.test(arg)
           fs.writeFile filePath, stdout, (err) =>
-            if err
+            if err and !(err.startsWith('Cloning'))
               console.error "Failed writeFile caused by\n #{err}"
             else
               @showInfo "gibo #{arg}", "Created #{fileName}", false
