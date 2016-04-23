@@ -57,12 +57,12 @@ module.exports = AtomGibo =
 
     execFile giboPath, [args[0].trim()], (err, stdout, stderr) =>
       if err?
-        console.error "Faile gibo\n #{err}"
+        console.error "Failed gibo\n #{err}"
         @showError err
         callback?()
         return
       if /unknown/i.test(stdout)
-        console.error "Unknown boilerplate\n #{stderr}"
+        console.error "Unknown boilerplate\n #{stdout}"
         @showError stdout
         callback?()
         return
