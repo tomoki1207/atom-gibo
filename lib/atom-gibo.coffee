@@ -56,14 +56,15 @@ module.exports = AtomGibo =
       return
 
     execFile giboPath, [args[0].trim()], (err, stdout, stderr) =>
-      if err? and !(err.startsWith('Cloning'))
-        console.error "Faile gibo\n #{err}"
+      if err?
+        console.error "Failed gibo\n #{err}"
         @showError err
         callback?()
         return
-      if stderr or /unknown/i.test(stdout)
-        console.error "Unknown boilerplate\n #{stderr + stdout}"
-        @showError stderr + stdout
+      msg = if process.platform is 'win32' then stdout else stderr
+      if /unknown/i.test(msg)
+        console.error "Unknown boilerplate\n #{stdout}"
+        @showError stdout
         callback?()
         return
 
