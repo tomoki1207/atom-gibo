@@ -5,7 +5,7 @@
 
 Using [gibo](https://github.com/simonwhitaker/gibo) from Atom.
 
-(todo: screen shot)
+![Gibo Usage](https://raw.githubusercontent.com/wiki/tomoki1207/atom-gibo/screenshot/gibo-usage.gif)
 
 ## Usage
 
