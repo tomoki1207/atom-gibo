@@ -1,16 +1,10 @@
 AtomGiboView = require './atom-gibo-view'
 {CompositeDisposable} = require 'atom'
-require './promise-finally'
 
 path = require 'path'
 fs = require 'fs'
 execFile = require('child_process').execFile
 
-# https://gist.github.com/jish/e9bcd75e391a2b21206b
-Promise::finally ?= (onFinally) ->
-  @catch (reason) ->
-    reason
-  .then onFinally
 isWin32 = () ->
   process.platform is 'win32'
 
@@ -55,8 +49,9 @@ module.exports = AtomGibo =
     .then (stdout) =>
       @showInfo description, stdout
     .catch (err) =>
+      console.error err
       @showError err
-    .finally () => callback?()
+    .then () => callback?()
 
   doGibo: (arg, destDir, callback) ->
     args = (arg.split />+/i).map (s) -> s.trim()
@@ -76,8 +71,9 @@ module.exports = AtomGibo =
     .then (msg) =>
       @showInfo arg, msg
     .catch (err) =>
+      console.error err
       @showError err
-    .finally () => callback?()
+    .then () => callback?()
 
   showInfo: (title, msg, dismiss = true) ->
     atom.notifications.addInfo "[gibo] #{title}", detail: msg, dismissable: dismiss
