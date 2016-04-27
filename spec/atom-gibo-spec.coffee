@@ -225,3 +225,21 @@ describe "AtomGibo", ->
             spy.callCount > 0
           runs ->
             expect(helper.fileSize(file)).toBeGreaterThan size
+    it "called with multiple boilerplates", ->
+      param = 'Java Jboss > .multipleIgnore'
+      cloneSpy = jasmine.createSpy "cloneSpy"
+      AtomGibo.doGibo '-u', testDir, cloneSpy
+      waitsFor ->
+        cloneSpy.callCount > 0
+      , 'waitsfor clone'
+      , 10000
+      runs ->
+        spy = jasmine.createSpy "callbackSpy"
+        AtomGibo.doGibo param, testDir, spy
+        waitsFor ->
+          spy.callCount > 0
+        runs ->
+          file = path.join testDir, '.multipleIgnore'
+          expect(fs.existsSync(file)).toBeTruthy()
+          size = helper.fileSize file
+          expect(size).toBeGreaterThan 0

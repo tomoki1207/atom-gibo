@@ -49,7 +49,6 @@ module.exports = AtomGibo =
     .then (stdout) =>
       @showInfo description, stdout
     .catch (err) =>
-      console.error err
       @showError err
     .then () => callback?()
 
