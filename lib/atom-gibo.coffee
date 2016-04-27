@@ -5,7 +5,10 @@ path = require 'path'
 fs = require 'fs'
 execFile = require('child_process').execFile
 
-giboPath = path.join __dirname, '/gibo', if process.platform is 'win32' then '/gibo.bat' else '/gibo'
+isWin32 = () ->
+  process.platform is 'win32'
+
+giboPath = path.join __dirname, '/gibo', if isWin32() then '/gibo.bat' else '/gibo'
 
 module.exports = AtomGibo =
 
@@ -36,66 +39,51 @@ module.exports = AtomGibo =
     @doGiboWithOption '-l', 'Available boilerplates'
 
   upgrade: ->
-    @doGiboWithOption '-u', 'Upgrade Result', false
+    @doGiboWithOption '-u', 'Upgrade Result'
 
   help: ->
     @doGiboWithOption '-h', 'gibo usage'
 
   doGiboWithOption: (option, description, callback) ->
-    execFile giboPath, [option], (err, stdout, stderr) =>
-      if err?
-        console.error "Failed gibo with option\n #{err}"
-        @showError err
-      else
-        @showInfo description, stdout
-      callback?()
+    @execGiboPromise [option]
+    .then (stdout) =>
+      @showInfo description, stdout
+    .catch (err) =>
+      @showError err
+    .then () => callback?()
 
   doGibo: (arg, destDir, callback) ->
-    args = arg.split />+/i
-    unless args.length <= 2
-      return
+    args = (arg.split />+/i).map (s) -> s.trim()
+    return unless args.length <= 2
 
-    execFile giboPath, [args[0].trim()], (err, stdout, stderr) =>
-      if err?
-        console.error "Failed gibo\n #{err}"
-        @showError err
-        callback?()
-        return
-      msg = if process.platform is 'win32' then stdout else stderr
-      if /unknown/i.test(msg)
-        console.error "Unknown boilerplate\n #{msg}"
-        @showError msg
-        callback?()
-        return
+    @execGiboPromise (args[0].split /\s/).map (s) -> s.trim()
+    .then (stdout) =>
+      new Promise (resolve, reject) =>
+        return resolve stdout if args[0].startsWith '-'
 
-      if arg.trim().startsWith '-'
-        @showInfo "gibo #{arg}", stdout
-        callback?()
-        return
-
-      fileName = args[1]?.trim() ? '.gitignore'
-      filePath = path.join destDir ? atom.project.getPaths()[0], fileName
-      try
-        if /\s+>\s+/i.test(arg)
-          fs.writeFile filePath, stdout, (err) =>
-            if err and !(err.startsWith('Cloning'))
-              console.error "Failed writeFile caused by\n #{err}"
-            else
-              @showInfo "gibo #{arg}", "Created #{fileName}", false
-            callback?()
-        else
-          fs.appendFile filePath, stdout, (err) =>
-            if err
-              console.error "Failed appendFile caused by\n #{err}"
-            else
-              @showInfo "gibo #{arg}", "Updated #{fileName}", false
-            callback?()
-      catch err
-        console.error "Exception occurred when access file\n #{err}"
-        @showError err
+        fileName = args[1] ? '.gitignore'
+        filePath = path.join destDir ? atom.project.getPaths()[0], fileName
+        func = if (/\s+>\s+/i.test arg) then fs.writeFile else fs.appendFile
+        func filePath, stdout, (err) =>
+          return reject err if err and !(err.startsWith('Cloning'))
+          resolve "Generated #{filePath}"
+    .then (msg) =>
+      @showInfo arg, msg
+    .catch (err) =>
+      console.error err
+      @showError err
+    .then () => callback?()
 
   showInfo: (title, msg, dismiss = true) ->
     atom.notifications.addInfo "[gibo] #{title}", detail: msg, dismissable: dismiss
 
   showError: (msg, dismiss = true) ->
     atom.notifications.addError "[gibo] Error", detail: msg, dismissable: dismiss
+
+  execGiboPromise: (arg) ->
+    new Promise (resolve, reject) ->
+      execFile giboPath, arg, (err, stdout, stderr) ->
+        return reject err if err?
+        msg = if isWin32() then stdout else stderr
+        return reject msg if /unknown argument/i.test msg
+        resolve stdout

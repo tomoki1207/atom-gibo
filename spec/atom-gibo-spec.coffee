@@ -74,7 +74,6 @@ describe "AtomGibo", ->
         expect(atomGibo.list).toHaveBeenCalled()
         expect(atomGibo.doGiboWithOption).toHaveBeenCalled()
         expect(atomGibo.doGiboWithOption.calls[0].args[0]).toEqual '-l'
-        expect(atomGibo.doGiboWithOption.calls[0].args[2]).not.toBeDefined()
 
   describe "upgrade command", ->
     it "called by command", ->
@@ -89,7 +88,6 @@ describe "AtomGibo", ->
         expect(atomGibo.upgrade).toHaveBeenCalled()
         expect(atomGibo.doGiboWithOption).toHaveBeenCalled()
         expect(atomGibo.doGiboWithOption.calls[0].args[0]).toEqual '-u'
-        expect(atomGibo.doGiboWithOption.calls[0].args[2]).toEqual false
 
   describe "help command", ->
     it "called by command", ->
@@ -104,7 +102,6 @@ describe "AtomGibo", ->
         expect(atomGibo.help).toHaveBeenCalled()
         expect(atomGibo.doGiboWithOption).toHaveBeenCalled()
         expect(atomGibo.doGiboWithOption.calls[0].args[0]).toEqual '-h'
-        expect(atomGibo.doGiboWithOption.calls[0].args[2]).not.toBeDefined()
 
   describe "generate command", ->
     it "called doGibo() with params when pressed enter", ->
@@ -228,3 +225,21 @@ describe "AtomGibo", ->
             spy.callCount > 0
           runs ->
             expect(helper.fileSize(file)).toBeGreaterThan size
+    it "called with multiple boilerplates", ->
+      param = 'Java Jboss > .multipleIgnore'
+      cloneSpy = jasmine.createSpy "cloneSpy"
+      AtomGibo.doGibo '-u', testDir, cloneSpy
+      waitsFor ->
+        cloneSpy.callCount > 0
+      , 'waitsfor clone'
+      , 10000
+      runs ->
+        spy = jasmine.createSpy "callbackSpy"
+        AtomGibo.doGibo param, testDir, spy
+        waitsFor ->
+          spy.callCount > 0
+        runs ->
+          file = path.join testDir, '.multipleIgnore'
+          expect(fs.existsSync(file)).toBeTruthy()
+          size = helper.fileSize file
+          expect(size).toBeGreaterThan 0
