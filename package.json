@@ -1,7 +1,7 @@
 {
   "name": "atom-gibo",
   "main": "./lib/atom-gibo",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Use gibo from Atom",
   "keywords": [
     "gibo"
