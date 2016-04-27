@@ -86,5 +86,5 @@ module.exports = AtomGibo =
       execFile giboPath, arg, (err, stdout, stderr) ->
         return reject err if err?
         msg = if isWin32() then stdout else stderr
-        return reject msg if /unknown/i.test msg
+        return reject msg if /unknown argument/i.test msg
         resolve stdout
