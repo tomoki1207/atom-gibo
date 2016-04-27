@@ -4,7 +4,8 @@
   "version": "0.4.3",
   "description": "Use gibo from Atom",
   "keywords": [
-    "gibo"
+    "gibo",
+    "gitignore"
   ],
   "activationCommands": {
     "atom-workspace": [
