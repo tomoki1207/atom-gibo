@@ -37,7 +37,22 @@ option | description | default key binding
 gibo _[boilerplates]_ | generate .gitignore file | `Ctrl-Alt-g g`
 gibo --help | Display gibo help text | `Ctrl-Alt-g h`
 gibo --list | List available boilerplates | `Ctrl-Alt-g l`
-gibo --upgrade | Upgrade list of available boilerplates | `Ctrl-Alt-g u`
+gibo --upgrade | Upgrade list of available boilerplates and snippets | `Ctrl-Alt-g u`
+
+## Snippets
+
+You can use snippets of boilerplates.
+Snippets prefix format is `gibo-<boilerplate name>`
+
+When you upgrade boilerplate, this script update your `{ConfigFolder}/snippets.cson`.
+(Because of saved updates immediately without reload ATOM)
+
+### Snippets not work on .gitignore
+
+Are you installed auto-complete package?  
+If you leave blank or default setting, snippets not work.  
+You will open configuration of auto-complete package and Find [File Blacklist] section.  
+If it left blank or default setting, snippets not work on .gitignore.
 
 ## Contributing
 
