@@ -83,11 +83,13 @@ describe "AtomGibo", ->
       runs ->
         atomGibo = atom.packages.getActivePackage("atom-gibo").mainModule
         spyOn(atomGibo, "upgrade").andCallThrough()
-        spyOn atomGibo, "doGiboWithOption"
+        spyOn(atomGibo, "doGiboWithOption").andCallThrough()
+        spyOn atomGibo, "updateSnippets"
         atom.commands.dispatch workspaceElement, 'gibo:upgrade-boilerplates'
         expect(atomGibo.upgrade).toHaveBeenCalled()
         expect(atomGibo.doGiboWithOption).toHaveBeenCalled()
         expect(atomGibo.doGiboWithOption.calls[0].args[0]).toEqual '-u'
+        expect(atomGibo.updateSnippets).toHaveBeenCalled()
 
   describe "help command", ->
     it "called by command", ->

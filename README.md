@@ -44,15 +44,14 @@ gibo --upgrade | Upgrade list of available boilerplates and snippets | `Ctrl-Alt
 You can use snippets of boilerplates.
 Snippets prefix format is `gibo-<boilerplate name>`
 
-When you upgrade boilerplate, this script update your `{ConfigFolder}/snippets.cson`.
+When you upgrade boilerplate, this package update your `{ConfigFolder}/snippets.cson`.  
 (Because of saved updates immediately without reload ATOM)
 
 ### Snippets not work on .gitignore
 
 Are you installed auto-complete package?  
-If you leave blank or default setting, snippets not work.  
 You will open configuration of auto-complete package and Find [File Blacklist] section.  
-If it left blank or default setting, snippets not work on .gitignore.
+If you leave blank (or default setting), snippets not work on .gitignore.  
 
 ## Contributing
 
