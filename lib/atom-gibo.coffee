@@ -4,11 +4,13 @@ AtomGiboView = require './atom-gibo-view'
 path = require 'path'
 fs = require 'fs'
 execFile = require('child_process').execFile
+CSON = require 'season'
 
 isWin32 = () ->
   process.platform is 'win32'
 
 giboPath = path.join __dirname, '/gibo', if isWin32() then '/gibo.bat' else '/gibo'
+boilerplatesPath = path.join (if isWin32() then process.env['APPDATA'] else process.env['HOME']), '/.gitignore-boilerplates'
 
 module.exports = AtomGibo =
 
@@ -39,7 +41,7 @@ module.exports = AtomGibo =
     @doGiboWithOption '-l', 'Available boilerplates'
 
   upgrade: ->
-    @doGiboWithOption '-u', 'Upgrade Result'
+    @doGiboWithOption '-u', 'Upgrade Result', @updateSnippets()
 
   help: ->
     @doGiboWithOption '-h', 'gibo usage'
@@ -87,3 +89,33 @@ module.exports = AtomGibo =
         msg = if isWin32() then stdout else stderr
         return reject msg if /unknown argument/i.test msg
         resolve stdout
+
+  updateSnippets: ->
+    filePath = CSON.resolve(path.join(atom.getConfigDirPath(), 'snippets'))
+
+    Promise.all [
+      new Promise (resolve, reject) ->
+        fs.readdir boilerplatesPath, (err, files) ->
+          return reject err if err?
+          files = files.map (f) -> path.join(boilerplatesPath, f)
+          resolve files.filter (f) -> fs.statSync(f).isFile() and /\.gitignore$/.test(f)
+    , new Promise (resolve, reject) ->
+        CSON.readFile filePath, (err, obj) ->
+          return reject err if err?
+          unless obj
+            obj ?= {}
+            obj['*'] ?= {}
+          resolve  obj
+      ]
+    .then (result) ->
+      root = result[1]
+      asterisk = root['*']
+      for file in result[0]
+        basename = (path.basename file).replace '.gitignore', ''
+        snippet = asterisk[basename] ?= {}
+        snippet.prefix = "gibo-#{basename}"
+        content = fs.readFileSync file
+        snippet.body = content.toString()
+      CSON.writeFileSync filePath, root
+    .catch (err) ->
+      console.error err
